@@ -8,12 +8,20 @@ const app = express();
 //Middleware
 app.use('/',bodyparser.json());
 
+//TODO Security
+app.use('/',()=>{})
+
 //Routes
 app.use('/users',userRouter)
 app.use('/reimbursements',reimbursementRouter)
 
-app.use('/login',()=>{
+// TODO Login
+// Will use a JWT instead of session or cookie to store the result of authentication
+// Reference:
+app.post('/login',()=>{
 });
+
+// TODO Authorization
 
 app.use('/',()=>{
   // Security
