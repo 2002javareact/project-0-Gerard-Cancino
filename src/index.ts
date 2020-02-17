@@ -17,7 +17,7 @@ app.use('/reimbursements',reimbursementRouter)
 
 // TODO Login
 // Will use a JWT instead of session or cookie to store the result of authentication
-// Reference:
+// Reference: https://medium.com/swlh/a-practical-guide-for-jwt-authentication-using-nodejs-and-express-d48369e7e6d4
 app.post('/login',()=>{
 });
 
