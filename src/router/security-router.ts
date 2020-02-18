@@ -1,9 +1,8 @@
+import * as jwt from 'json-web-token';
 import * as express from 'express';
 import {users} from '../database';
-//import {User} from '../models/User';
-import * as jwt from 'json-web-token';
 
-export const userRouter = express.Router() ;
+export const securityRouter = express.Router() ;
 
 const key = 'NotForProduction';
 
@@ -22,29 +21,33 @@ const key = 'NotForProduction';
 
 */
 
-
-
-// Find Users
-userRouter.get('/',(req,res)=>{ 
-  res.json(users);
-});
-
-// Find Users by ID
-userRouter.get('/:id',(req,res)=>{
-  let isFound = false;
+securityRouter.post('/login',(req,res)=>{
+  let currentUser;
   for(let user of users){
-    if(user.username === req.params.username){
-      isFound=true;
-      res.status(200).json(user);
+    if(user.username===req.body.username&&user.password===req.body.password){
+      currentUser=user;
     }
   }
-  if(!isFound){
+  if(currentUser){
+    console.log(currentUser)
+    const payload={
+      username:currentUser.username,
+      role:currentUser.role
+    }
+    console.log(jwt.getAlgorithms())
+    jwt.encode(key,payload,'HS256',(err,token)=>{
+      if(err){
+        console.log(err)
+        // Prob a server error
+        res.sendStatus(400);
+      }
+      else{
+        res.cookie('auth',token);
+        res.sendStatus(200);
+      }
+    })
+  }
+  else{
     res.sendStatus(404);
   }
-})
-
-// Update User
-userRouter.patch('/',(req,res)=>{
-  //TODO
-})
-
+});
