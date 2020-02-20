@@ -3,7 +3,7 @@ import e = require("express")
 // TODO: set up database
 export const users = [
   {
-    username: 'test',
+    username: 'ahm_hash',
     password: 'password',
     firstName: 'first',
     lastName: 'last',

@@ -3,11 +3,13 @@ import * as bodyparser from 'body-parser';
 import {userRouter} from './router/user-router';
 import {reimbursementRouter} from './router/reimbursement-router';
 import {securityRouter} from './router/security-router';
+import {sessionMiddleware} from './middleware/session-middleware';
 
 const app = express();
 
 //Middleware
 app.use('/',bodyparser.json());
+app.use(sessionMiddleware)
 
 //TODO Security
 app.use('/',securityRouter);
@@ -24,6 +26,6 @@ app.use('/reimbursements',reimbursementRouter)
 //   // Security
 // });
 
-app.listen(2020,()=>{
-  console.log('App has started on port 2020');
+app.listen(2030,()=>{
+  console.log('App has started on port 2030');
 });

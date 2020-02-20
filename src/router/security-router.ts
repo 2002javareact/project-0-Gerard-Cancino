@@ -1,6 +1,7 @@
 import * as jwt from 'json-web-token';
 import * as express from 'express';
 import {users} from '../database';
+import {BadCredentialsError} from '../errors/BadCredentialsError';
 
 export const securityRouter = express.Router() ;
 
@@ -20,34 +21,59 @@ const key = 'NotForProduction';
 
 
 */
-
+// Documentation for JWT https://www.npmjs.com/package/json-web-token
 securityRouter.post('/login',(req,res)=>{
-  let currentUser;
-  for(let user of users){
-    if(user.username===req.body.username&&user.password===req.body.password){
-      currentUser=user;
+  // Get Data
+  const {username,password} = req.body;
+  // Validate date
+  if(!username||!password) res.status(404).send('Please include username and password');
+  else{
+    try{
+      const currentUser = findUsernameByUsernameAndPassword(username,password);
+      const payload={
+        username:currentUser.username,
+        role:currentUser.role
+      }
+      jwt.encode(key,payload,'HS256',(err,token)=>{
+        if(err){
+          // Prob a server error
+          console.log(err)
+          res.status(400).send(err);
+        }
+        else{
+          console.log(token)
+          req.session.token = token;
+          res.status(200).json(token);
+        }
+      })
     }
+    catch(e) {
+      console.log(e)
+      res.status(e.status).send(e.message);
+    }
+  
   }
-  if(currentUser){
-    console.log(currentUser)
-    const payload={
-      username:currentUser.username,
-      role:currentUser.role
-    }
-    console.log(jwt.getAlgorithms())
-    jwt.encode(key,payload,'HS256',(err,token)=>{
+});
+
+securityRouter.get('/token',(req,res)=>{
+  const {token} = req.body;
+  if(!token) res.status(404).send('Mising token');
+  else{
+    jwt.decode(key,token,(err,decodedPayload)=>{
       if(err){
-        console.log(err)
-        // Prob a server error
-        res.sendStatus(400);
+        res.status(404).send(err);
       }
       else{
-        res.cookie('auth',token);
-        res.sendStatus(200);
+        res.status(200).json(decodedPayload);
       }
     })
   }
-  else{
-    res.sendStatus(404);
+})
+
+function findUsernameByUsernameAndPassword(username:string, password:string){
+  console.log(username + password)
+  for(let user of users){
+    if(user.username===username&&user.password===password) return user;
   }
-});
+  throw new BadCredentialsError();
+}
