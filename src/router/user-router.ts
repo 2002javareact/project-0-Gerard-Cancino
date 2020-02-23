@@ -5,6 +5,7 @@ import { BadCredentialsError } from '../errors/BadCredentialsError';
 import { findUserById, findUsers, updateUser } from '../services/user-service';
 import { authCheckId, authFactory } from '../middleware/auth-middleware';
 import { isNamedExports } from 'typescript';
+import { financeManager, admin } from '../models/Role';
 
 export const userRouter = express.Router() ;
 
@@ -28,7 +29,7 @@ const key = 'NotForProduction';
 
 
 // Find Users
-userRouter.get('/',authFactory(['Admin']), async (req,res,next)=>{ 
+userRouter.get('/',authFactory([financeManager]), async (req,res,next)=>{ 
   try{
     const users = await findUsers();
     res.json(users);
@@ -39,7 +40,7 @@ userRouter.get('/',authFactory(['Admin']), async (req,res,next)=>{
 });
 
 // Find Users by ID
-userRouter.get('/:id',authFactory(['Admin','User']), authCheckId, async (req,res,next)=>{
+userRouter.get('/:id',authFactory([financeManager]), authCheckId, async (req,res,next)=>{
   const id = +req.params.id;
   try{
     if(isNaN(id)){
@@ -56,7 +57,7 @@ userRouter.get('/:id',authFactory(['Admin','User']), authCheckId, async (req,res
 
 
 // Update User
-userRouter.patch('/',async (req,res,next)=>{
+userRouter.patch('/',authFactory([admin]), async (req,res,next)=>{
   //TODO
   const {username,firstName,lastName,emailAddress,role} = req.body;
   try{

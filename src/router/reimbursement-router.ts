@@ -41,8 +41,8 @@ reimbursementRouter.get('/author/userId/:userId',authFactory([financeManager]), 
 });
 
 // Submit Reimbursements
-reimbursementRouter.post('/',authFactory([admin]),(req,res,next)=>{
-  let {author,
+reimbursementRouter.post('/',(req,res,next)=>{
+  const {author,
     amount,
     dateSubmitted,
     dateResolved,
@@ -52,7 +52,7 @@ reimbursementRouter.post('/',authFactory([admin]),(req,res,next)=>{
     type} = req.body;
   try{
     if(author&&amount&&dateSubmitted&&dateResolved&&description&&resolver&&status&&type){
-      const result = saveOneReimbursement(new Reimbursements(0,author,amount,dateSubmitted,dateResolved,description,resolver,status,type)); // TODO
+      const result = saveOneReimbursement(new Reimbursements(0,author,amount,dateSubmitted,dateResolved,description,resolver,status,type));
       res.send(201).json(result);
     }
     else{
@@ -67,6 +67,20 @@ reimbursementRouter.post('/',authFactory([admin]),(req,res,next)=>{
 });
 
 // Update Reimbursements
-reimbursementRouter.patch('/users',(req,res)=>{
-  //TODO: Write the patch
+reimbursementRouter.patch('/users',authFactory([financeManager]),(req,res,next)=>{
+  const {
+    reimbursementId,author,amount,dateSubmitted,dateResolved,description,status,resolver,type
+  } = req.body;
+  try{
+    if(reimbursementId||author||amount||dateSubmitted||dateResolved||description||status||resolver||type){
+      const result = updateOneReimbursement({reimbursementId,author,amount,dateSubmitted,dateResolved,description,status,resolver,type});
+      res.send(201).json(result);
+    }
+    else{
+      throw ReimbursementFieldsMissing;
+    }
+  }
+  catch(e){
+    next(e);
+  }
 });

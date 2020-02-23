@@ -10,7 +10,7 @@ export default class Reimbursement {
   status: number;
   resolver?: number; 
   type?: number;
-  constructor(reimbursementId,author:number,amount:number,dateSubmitted:number,dateResolved:number,description:string,status:number,resolver?:number,type?:number){
+  constructor(reimbursementId:number,author:number,amount:number,dateSubmitted:number,dateResolved:number,description:string,status:number,resolver?:number,type?:number){
     this.reimbursementId=reimbursementId;
     this.author=author;
     this.amount=amount;
