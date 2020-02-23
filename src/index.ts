@@ -22,9 +22,17 @@ app.use('/reimbursements',reimbursementRouter)
 
 // TODO Authorization
 
-// app.use('/',()=>{
-//   // Security
-// });
+
+// Error Handler Catch All Router
+app.use('/',(e,req,res,next)=>{
+  console.error(e.stack);
+  if(e.status<500){
+      res.status(e.status).send(e.message);
+  }
+  else{
+      res.status(e.status).send('Internal Server Error')
+  }
+})
 
 app.listen(2030,()=>{
   console.log('App has started on port 2030');

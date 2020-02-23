@@ -2,6 +2,8 @@ import * as express from 'express';
 import {users} from '../database';
 //import {User} from '../models/User';
 import * as jwt from 'json-web-token';
+import { BadCredentialsError } from '../errors/BadCredentialsError';
+import { findUserById } from '../services/user-service';
 
 export const userRouter = express.Router() ;
 
@@ -30,18 +32,21 @@ userRouter.get('/',(req,res)=>{
 });
 
 // Find Users by ID
-userRouter.get('/:id',(req,res)=>{
-  let isFound = false;
-  for(let user of users){
-    if(user.username === req.params.username){
-      isFound=true;
-      res.status(200).json(user);
+userRouter.get('/:id',async (req,res,next)=>{
+  const id = +req.params.id;
+  try{
+    if(isNaN(id)){
+      throw new BadCredentialsError;
     }
+    const user = await findUserById(id);
+    res.json(user);
   }
-  if(!isFound){
-    res.sendStatus(404);
+  catch(e){
+    next(e);
   }
 })
+
+
 
 // Update User
 userRouter.patch('/',(req,res)=>{

@@ -3,19 +3,9 @@ import * as express from 'express';
 import {users} from '../database';
 import {BadCredentialsError} from '../errors/BadCredentialsError';
 
-
 export const securityRouter = express.Router() ;
 
 const key = 'NotForProduction';
-
-
-function findUsernameByUsernameAndPassword(username:string, password:string){
-  console.log(username + password)
-  for(let user of users){
-    if(user.username===username&&user.password===password) return user;
-  }
-  throw new BadCredentialsError();
-}
 
 // TODO Login
 // Will use a JWT instead of session or cookie to store the result of authentication
@@ -75,3 +65,11 @@ securityRouter.get('/token',(req,res)=>{
     })
   }
 })
+
+function findUsernameByUsernameAndPassword(username:string, password:string){
+  console.log(username + password)
+  for(let user of users){
+    if(user.username===username&&user.password===password) return user;
+  }
+  throw new BadCredentialsError();
+}
