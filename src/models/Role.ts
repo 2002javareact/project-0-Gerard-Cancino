@@ -1,3 +1,7 @@
+export const admin = 'Admin';
+export const user = 'User';
+export const financeManager = 'FinanceManage';
+
 export default class Role {
   roleId: number;
   role: string; // TODO: make unique in services

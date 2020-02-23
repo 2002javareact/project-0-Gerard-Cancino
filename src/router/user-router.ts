@@ -1,9 +1,10 @@
 import * as express from 'express';
-import {users} from '../database';
 //import {User} from '../models/User';
 import * as jwt from 'json-web-token';
 import { BadCredentialsError } from '../errors/BadCredentialsError';
-import { findUserById } from '../services/user-service';
+import { findUserById, findUsers, updateUser } from '../services/user-service';
+import { authCheckId, authFactory } from '../middleware/auth-middleware';
+import { isNamedExports } from 'typescript';
 
 export const userRouter = express.Router() ;
 
@@ -27,12 +28,18 @@ const key = 'NotForProduction';
 
 
 // Find Users
-userRouter.get('/',(req,res)=>{ 
-  res.json(users);
+userRouter.get('/',authFactory(['Admin']), async (req,res,next)=>{ 
+  try{
+    const users = await findUsers();
+    res.json(users);
+  }
+  catch(e){
+    next(e);
+  }
 });
 
 // Find Users by ID
-userRouter.get('/:id',async (req,res,next)=>{
+userRouter.get('/:id',authFactory(['Admin','User']), authCheckId, async (req,res,next)=>{
   const id = +req.params.id;
   try{
     if(isNaN(id)){
@@ -49,7 +56,17 @@ userRouter.get('/:id',async (req,res,next)=>{
 
 
 // Update User
-userRouter.patch('/',(req,res)=>{
+userRouter.patch('/',async (req,res,next)=>{
   //TODO
+  const {username,firstName,lastName,emailAddress,role} = req.body;
+  try{
+    if(username||firstName||lastName||emailAddress||role){
+      const user = await updateUser({username,firstName,lastName,emailAddress,role});
+      res.json(user);
+    }
+  }
+  catch(e){
+    next(e);
+  }
 })
 

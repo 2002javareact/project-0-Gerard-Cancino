@@ -1,51 +1,47 @@
 import * as express from 'express';
-import {reimbursements} from '../database';
 import Reimbursements from '../models/Reimbursement';
+import { authFactory, authCheckId } from '../middleware/auth-middleware';
+import { financeManager, admin } from '../models/Role';
+import { BadCredentialsError } from '../errors/BadCredentialsError';
+import { ReimbursementFieldsMissing } from '../errors/ReimbursementFieldsMissing';
+import { findReimbursementsByUserId, saveOneReimbursement } from '../services/reimbursement-service';
+import { isNamedExports } from 'typescript';
+import { daoFindReimbursementsByStatusId } from '../repositories/reimbursement-dao';
 
 export const reimbursementRouter = express.Router();
 
 // Find Reimbursements by Status
-reimbursementRouter.get('/status/:statusId',(req,res)=>{
+reimbursementRouter.get('/status/:statusId',authFactory([financeManager]), async (req,res,next)=>{
   const statusId = +req.params.statusId;
-  if(isNaN(statusId)){
-    res.sendStatus(400);
+  try{
+    if(isNaN(statusId)){
+      throw new BadCredentialsError;
+    }
+    const result = await daoFindReimbursementsByStatusId(statusId);
+    res.send(200).json(result);
   }
-  else{
-    let isFound = false;
-    for(let reimbursement of reimbursements){
-      if(reimbursement.statusId===statusId){
-        isFound = true;
-        res.send(200).json(reimbursement);
-      }
-    }
-    if(!isFound){
-      res.sendStatus(404);
-    }
+  catch(e){
+    next(e);
   }
 });
 
 // Find Reimbursements by User
-reimbursementRouter.get('/author/userId/:userId',(req,res)=>{
+reimbursementRouter.get('/author/userId/:userId',authFactory([financeManager]), authCheckId, async (req,res,next)=>{
   const userId = +req.params.userId;
-  if(isNaN(userId)){
-    res.sendStatus(400);
+  try{
+    if(isNaN(userId)){
+      throw new BadCredentialsError;
+    }
+    const reimbursements = await findReimbursementsByUserId(userId);
+    res.send(200).json(reimbursements);
   }
-  else{
-    let isFound = false;
-    for(let reimbursement of reimbursements){
-      if(reimbursement.userId===userId){
-        isFound=true;
-        res.send(200).json(reimbursement);
-      }
-    }
-    if(!isFound){
-      res.sendStatus(404);
-    }
+  catch(e){
+    next(e);
   }
 });
 
 // Submit Reimbursements
-reimbursementRouter.post('/',(req,res)=>{
+reimbursementRouter.post('/',authFactory([admin]),(req,res,next)=>{
   let {author,
     amount,
     dateSubmitted,
@@ -54,14 +50,19 @@ reimbursementRouter.post('/',(req,res)=>{
     resolver,
     status,
     type} = req.body;
-  if(author&&amount&&dateSubmitted&&dateResolved&&description&&resolver&&status&&type){
-    // TODO: Add SQL 
-    reimbursements.push(new Reimbursements(author,amount,dateSubmitted,dateResolved,description,resolver,status,type));
-    res.sendStatus(201);
+  try{
+    if(author&&amount&&dateSubmitted&&dateResolved&&description&&resolver&&status&&type){
+      const result = saveOneReimbursement(new Reimbursements(0,author,amount,dateSubmitted,dateResolved,description,resolver,status,type)); // TODO
+      res.send(201).json(result);
+    }
+    else{
+      throw ReimbursementFieldsMissing;
+    }
   }
-  else{
-    res.status(400).send('Please include all reimbursement fields');
+  catch(e){
+    next(e);
   }
+
 
 });
 

@@ -5,17 +5,50 @@ import { UserNotFoundError } from "../errors/UserNotFoundError";
 import { userDTOToUserConverter } from "../utils/user-dto-to-user-converter";
 import { InternalServerError } from "../errors/InternalServerError";
 
+export async function daoFindUsers():Promise<User>{
+  let client:PoolClient;
+  try{
+    client=await connectionPool.connect();
+    let result = await client.query('SELECT * FROM USERS;')
+    return result.rows.map(userDTOToUserConverter);
+  }
+  catch(e){
+    throw new InternalServerError;
+  }
+  finally{
+    client.release();
+  }
+}
+
 export async function daoFindUserById(userId:number):Promise<User>{
   let client:PoolClient;
   try{
     client = await connectionPool.connect();
-    let result = await client.query('') // TODO query
+    let result = await client.query('SELECT * FROM reimbursement WHERE user_id=$1',[userId]) // TODO query
     if(result.rowCount===0){
       throw new UserNotFoundError;
     }
     return userDTOToUserConverter(result.row[0]);
   }
   catch(e){
-    throw new InternalServerError();
+    throw new InternalServerError;
+  }
+  finally{
+    client.release();
+  }
+}
+
+export async function daoUpdateUser(params){
+  let client:PoolClient;
+  try{
+    client = await connectionPool.connect();
+    let result = await client.query(''); //TODO
+    return userDTOToUserConverter(result.row[0]);
+  }
+  catch(e){
+    throw new InternalServerError;
+  }
+  finally{
+    client.release();
   }
 }

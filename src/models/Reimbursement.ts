@@ -1,7 +1,7 @@
 
 // TODO set up 
 export default class Reimbursement {
-  reimbursement: number;
+  reimbursementId: number;
   author: number;
   amount: number;
   dateSubmitted: number;
@@ -10,7 +10,8 @@ export default class Reimbursement {
   status: number;
   resolver?: number; 
   type?: number;
-  constructor(author:number,amount:number,dateSubmitted:number,dateResolved:number,description:string,status:number,resolver?:number,type?:number){
+  constructor(reimbursementId,author:number,amount:number,dateSubmitted:number,dateResolved:number,description:string,status:number,resolver?:number,type?:number){
+    this.reimbursementId=reimbursementId;
     this.author=author;
     this.amount=amount;
     this.dateSubmitted=dateSubmitted;
