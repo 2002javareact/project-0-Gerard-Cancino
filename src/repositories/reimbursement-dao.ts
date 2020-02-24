@@ -4,7 +4,7 @@ import { reimbursementDTOToReimbursementConverter } from '../utils/reimbursement
 import { InternalServerError } from '../errors/InternalServerError';
 import Reimbursement from '../models/Reimbursement';
 
-export async function daoFindReimbursementsByStatusId(statusId):Promise<Reimbursement>{
+export async function daoFindReimbursementsByStatusId(statusId):Promise<Reimbursement[]>{
   let client:PoolClient;
   try{
     client=await connectionPool.connect();
@@ -15,11 +15,11 @@ export async function daoFindReimbursementsByStatusId(statusId):Promise<Reimburs
     throw new InternalServerError;
   }
   finally{
-    client.release();
+    client && client.release();
   }
 }
 
-export async function daoFindReimbursementsByUserId(userId):Promise<Reimbursement>{
+export async function daoFindReimbursementsByUserId(userId):Promise<Reimbursement[]>{
   let client:PoolClient;
   try{
     client=await connectionPool.connect();
@@ -30,7 +30,7 @@ export async function daoFindReimbursementsByUserId(userId):Promise<Reimbursemen
     throw new InternalServerError;
   }
   finally{
-    client.release();
+    client && client.release();
   }
 }
 
@@ -56,6 +56,21 @@ export async function daoSaveOneReimbursement(reimbursement):Promise<Reimburseme
     throw new InternalServerError;
   }
   finally{
-    client.release(); 
+    client && client.release(); 
+  }
+}
+
+export async function daoUpdateOneReimbursement(reimbursementField):Promise<Reimbursement>{
+  let client:PoolClient;
+  try{
+    client = await connectionPool.connect();
+    let result = await client.query('') // TODO Patch
+    return reimbursementDTOToReimbursementConverter(result.rows[0]);
+  }
+  catch(e){
+    throw new InternalServerError;
+  }
+  finally{
+    client && client.release();
   }
 }

@@ -4,14 +4,14 @@ import { authFactory, authCheckId } from '../middleware/auth-middleware';
 import { financeManager, admin } from '../models/Role';
 import { BadCredentialsError } from '../errors/BadCredentialsError';
 import { ReimbursementFieldsMissing } from '../errors/ReimbursementFieldsMissing';
-import { findReimbursementsByUserId, saveOneReimbursement } from '../services/reimbursement-service';
+import { findReimbursementsByUserId, saveOneReimbursement, updateOneReimbursement } from '../services/reimbursement-service';
 import { isNamedExports } from 'typescript';
 import { daoFindReimbursementsByStatusId } from '../repositories/reimbursement-dao';
 
 export const reimbursementRouter = express.Router();
 
 // Find Reimbursements by Status
-reimbursementRouter.get('/status/:statusId',authFactory([financeManager]), async (req,res,next)=>{
+reimbursementRouter.get('/status/:statusId',authFactory([admin,financeManager]), async (req,res,next)=>{
   const statusId = +req.params.statusId;
   try{
     if(isNaN(statusId)){
@@ -26,7 +26,7 @@ reimbursementRouter.get('/status/:statusId',authFactory([financeManager]), async
 });
 
 // Find Reimbursements by User
-reimbursementRouter.get('/author/userId/:userId',authFactory([financeManager]), authCheckId, async (req,res,next)=>{
+reimbursementRouter.get('/author/userId/:userId',authFactory([admin,financeManager]), authCheckId, async (req,res,next)=>{
   const userId = +req.params.userId;
   try{
     if(isNaN(userId)){
@@ -41,7 +41,7 @@ reimbursementRouter.get('/author/userId/:userId',authFactory([financeManager]), 
 });
 
 // Submit Reimbursements
-reimbursementRouter.post('/',(req,res,next)=>{
+reimbursementRouter.post('/',authFactory([admin,financeManager]),(req,res,next)=>{
   const {author,
     amount,
     dateSubmitted,
@@ -67,7 +67,7 @@ reimbursementRouter.post('/',(req,res,next)=>{
 });
 
 // Update Reimbursements
-reimbursementRouter.patch('/users',authFactory([financeManager]),(req,res,next)=>{
+reimbursementRouter.patch('/',authFactory([admin, financeManager]),(req,res,next)=>{
   const {
     reimbursementId,author,amount,dateSubmitted,dateResolved,description,status,resolver,type
   } = req.body;

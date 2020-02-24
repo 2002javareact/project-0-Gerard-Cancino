@@ -29,7 +29,7 @@ const key = 'NotForProduction';
 
 
 // Find Users
-userRouter.get('/',authFactory([financeManager]), async (req,res,next)=>{ 
+userRouter.get('/',authFactory([admin,financeManager]), async (req,res,next)=>{ 
   try{
     const users = await findUsers();
     res.json(users);
@@ -40,7 +40,7 @@ userRouter.get('/',authFactory([financeManager]), async (req,res,next)=>{
 });
 
 // Find Users by ID
-userRouter.get('/:id',authFactory([financeManager]), authCheckId, async (req,res,next)=>{
+userRouter.get('/:id',authFactory([admin,financeManager]), authCheckId, async (req,res,next)=>{
   const id = +req.params.id;
   try{
     if(isNaN(id)){

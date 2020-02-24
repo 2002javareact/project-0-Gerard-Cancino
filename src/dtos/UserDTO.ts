@@ -6,12 +6,14 @@ export class UserDTO{
   firstName: string
   lastName: string
   emailAddress: string
-  role: Role
-  constructor(username:string,firstName:string,lastName:string,emailAddress:string,role:Role){
+  roleId: number
+  roleName: string
+  constructor(username:string,firstName:string,lastName:string,emailAddress:string,roleId:number,roleName:string){
     this.username=username;
     this.firstName=firstName;
     this.lastName=lastName;
     this.emailAddress=emailAddress;
-    this.role=role;
+    this.roleId=roleId;
+    this.roleName=roleName;
   }
 }

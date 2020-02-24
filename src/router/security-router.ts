@@ -1,21 +1,12 @@
 import * as jwt from 'json-web-token';
 import * as express from 'express';
-import {users} from '../database';
 import {BadCredentialsError} from '../errors/BadCredentialsError';
+import { findUserByUsernameAndPassword } from '../services/user-service';
 
 
 export const securityRouter = express.Router() ;
 
 const key = 'NotForProduction';
-
-
-function findUsernameByUsernameAndPassword(username:string, password:string){
-  console.log(username + password)
-  for(let user of users){
-    if(user.username===username&&user.password===password) return user;
-  }
-  throw new BadCredentialsError();
-}
 
 // TODO Login
 // Will use a JWT instead of session or cookie to store the result of authentication
@@ -32,14 +23,14 @@ function findUsernameByUsernameAndPassword(username:string, password:string){
 
 */
 // Documentation for JWT https://www.npmjs.com/package/json-web-token
-securityRouter.post('/login',(req,res)=>{
+securityRouter.post('/login', async (req,res)=>{
   // Get Data
   const {username,password} = req.body;
   // Validate date
   if(!username||!password) res.status(404).send('Please include username and password');
   else{
     try{
-      const currentUser = findUsernameByUsernameAndPassword(username,password);
+      const currentUser = await findUserByUsernameAndPassword(username,password);
       const payload={
         username:currentUser.username,
         role:currentUser.role
