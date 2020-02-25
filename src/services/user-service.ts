@@ -13,7 +13,7 @@ export async function updateUser(updateFields):Promise<User>{
   return await daoUpdateUser(updateFields);
 }
 
-export async function findUserByUsernameAndPassword(username:string, password:string):Promise<User>{
+export async function findUserByUsernameAndPassword(username:string,password:string):Promise<User>{
   return await daoFindUserByUsernameAndPassword(username,password);
 }
 

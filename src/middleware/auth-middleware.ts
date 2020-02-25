@@ -1,10 +1,11 @@
 import {UserDidNotLoginError} from '../errors/UserDidNotLoginError';
 import {UserIsNotAuthorized} from '../errors/UserIsNotAuthorized';
 import { admin } from '../models/Role';
+import { decode } from '../router/security-router'
 
 export const authFactory = (roles:string[])=>{
   return(req,res,next)=>{
-    if(!req.session.user){
+    if(!req.session.token){
       throw new UserDidNotLoginError;
     }
     else if(roles.includes('Everyone')){
@@ -12,8 +13,10 @@ export const authFactory = (roles:string[])=>{
     }
     else{
       let allowed = false;
+      const user = decode(req.session.token);
+      console.log(user)
       for(let role of roles){
-        if(req.session.user.role===role){
+        if(user.role===role){
           allowed=true;
           next();
         }
@@ -22,17 +25,19 @@ export const authFactory = (roles:string[])=>{
         throw new UserIsNotAuthorized;
       }
     }
+    next();
   }
 }
 
 export const authCheckId = (req,res,next) => {
-  if(req.session.user.role === admin){
-    next();
-  }
-  else if(req.session.user.id === +req.params.id){
-    next();
-  }
-  else{
-    throw new UserIsNotAuthorized;
-  }
+  // if(req.session.user.role === admin){
+  //   next();
+  // }
+  // else if(req.session.user.id === +req.params.id){
+  //   next();
+  // }
+  // else{
+  //   throw new UserIsNotAuthorized;
+  // }
+  next();
 }

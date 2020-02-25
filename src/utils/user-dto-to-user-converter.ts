@@ -3,9 +3,12 @@ import {User} from "../models/User";
 import Role from "../models/Role";
 
 export function userDTOToUserConverter(userDTO:UserDTO):User {
-  return new User(userDTO.username,
-    userDTO.emailAddress,
-    userDTO.firstName,
-    userDTO.lastName,
-    new Role(userDTO.roleId,userDTO.roleName))
+  console.log('in converters')
+  return new User(
+    userDTO.id,
+    userDTO.username,
+    userDTO.first_name,
+    userDTO.last_name,
+    userDTO.email,
+    new Role(userDTO.role_id,userDTO.role_name))
 }

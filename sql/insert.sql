@@ -1,4 +1,4 @@
-insert into "role" (name) values ('admin'),('finance-manage'),('user');
+insert into "role" ("name") values ('admin'),('finance-manage'),('user');
 
 insert into reimbursement_status (status) values ('Pending'),('Approved'),('Denied');
 

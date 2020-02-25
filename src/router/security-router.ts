@@ -1,7 +1,11 @@
 import * as jwt from 'json-web-token';
 import * as express from 'express';
 import {BadCredentialsError} from '../errors/BadCredentialsError';
-import { findUserByUsernameAndPassword } from '../services/user-service';
+import {findUserByUsernameAndPassword } from '../services/user-service';
+import { UserIsNotAuthorized } from '../errors/UserIsNotAuthorized';
+import { InternalServerError } from '../errors/InternalServerError';
+import { authFactory } from '../middleware/auth-middleware';
+import { admin } from '../models/Role';
 
 
 export const securityRouter = express.Router() ;
@@ -19,11 +23,9 @@ const key = 'NotForProduction';
   // The tuturial went through buffers
   // Ref: https://www.freecodecamp.org/news/do-you-want-a-better-understanding-of-buffer-in-node-js-check-this-out-2e29de2968e8/
   // A buffer is a class to manipulate and interact with binary data.  It is considered the waiting period for data to be processed
-
-
 */
 // Documentation for JWT https://www.npmjs.com/package/json-web-token
-securityRouter.post('/login', async (req,res)=>{
+securityRouter.post('/login', authFactory([admin]), async (req,res)=>{
   // Get Data
   const {username,password} = req.body;
   // Validate date
@@ -32,8 +34,9 @@ securityRouter.post('/login', async (req,res)=>{
     try{
       const currentUser = await findUserByUsernameAndPassword(username,password);
       const payload={
+        id:currentUser.userId,
         username:currentUser.username,
-        role:currentUser.role
+        role:currentUser.role.role
       }
       jwt.encode(key,payload,'HS256',(err,token)=>{
         if(err){
@@ -52,17 +55,17 @@ securityRouter.post('/login', async (req,res)=>{
   }
 });
 
-securityRouter.get('/token',(req,res)=>{
-  const {token} = req.body;
-  if(!token) res.status(404).send('Mising token');
+export function decode(token){
+  if(!token) throw new UserIsNotAuthorized;
   else{
-    jwt.decode(key,token,(err,decodedPayload)=>{
+    let decodedValue = jwt.decode(key,token,(err,decodedPayload)=>{
       if(err){
-        res.status(404).send(err);
+        throw new InternalServerError;
       }
       else{
-        res.status(200).json(decodedPayload);
+        return decodedPayload;
       }
     })
+    return decodedValue;
   }
-})
+}

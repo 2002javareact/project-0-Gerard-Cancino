@@ -1,6 +1,6 @@
-export const admin = 'Admin';
-export const user = 'User';
-export const financeManager = 'FinanceManage';
+export const admin = 'admin';
+export const user = 'user';
+export const financeManager = 'finance-manage';
 
 export default class Role {
   roleId: number;

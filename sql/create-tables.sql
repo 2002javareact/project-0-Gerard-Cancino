@@ -12,7 +12,7 @@ create table "role" (
 
 create table "user" (
 	id serial primary key,
-	"username" varchar unique,
+	username varchar unique,
 	"password" varchar ,
 	first_name varchar,
 	last_name varchar,

@@ -8,7 +8,7 @@ export async function daoFindReimbursementsByStatusId(statusId):Promise<Reimburs
   let client:PoolClient;
   try{
     client=await connectionPool.connect();
-    let result = await client.query('SELECT * FROM REIMBURSEMENT WHERE status_id=$1',[statusId]);
+    let result = await client.query('SELECT * FROM public.reimbursement WHERE status_id=$1',[statusId]);
     return result.rows.map(reimbursementDTOToReimbursementConverter);
   }
   catch(e){
@@ -23,7 +23,7 @@ export async function daoFindReimbursementsByUserId(userId):Promise<Reimbursemen
   let client:PoolClient;
   try{
     client=await connectionPool.connect();
-    let result = await client.query(''); //TODO
+    let result = await client.query('SELECT * FROM public.reimbursement WHERE user_id=$1',[userId]); //TODO
     return result.rows.map(reimbursementDTOToReimbursementConverter);
   }
   catch(e){
