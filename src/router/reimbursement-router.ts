@@ -6,7 +6,8 @@ import { BadCredentialsError } from '../errors/BadCredentialsError';
 import { ReimbursementFieldsMissing } from '../errors/ReimbursementFieldsMissing';
 import { findReimbursementsByUserId, saveOneReimbursement, updateOneReimbursement } from '../services/reimbursement-service';
 import { isNamedExports } from 'typescript';
-import { daoFindReimbursementsByStatusId } from '../repositories/reimbursement-dao';
+import { daoFindReimbursementsByStatusId, daoUpdateOneReimbursement } from '../repositories/reimbursement-dao';
+import { ReimbursementDTO } from '../dtos/ReimbursementDTO';
 
 export const reimbursementRouter = express.Router();
 
@@ -17,8 +18,8 @@ reimbursementRouter.get('/status/:statusId',authFactory([admin,financeManager]),
     if(isNaN(statusId)){
       throw new BadCredentialsError;
     }
-    const result = await daoFindReimbursementsByStatusId(statusId);
-    res.send(200).json(result);
+    let result = await daoFindReimbursementsByStatusId(statusId);
+    res.status(200).json(result);
   }
   catch(e){
     next(e);
@@ -33,7 +34,7 @@ reimbursementRouter.get('/author/userId/:userId',authFactory([admin,financeManag
       throw new BadCredentialsError;
     }
     const reimbursements = await findReimbursementsByUserId(userId);
-    res.send(200).json(reimbursements);
+    res.status(200).json(reimbursements);
   }
   catch(e){
     next(e);
@@ -41,22 +42,23 @@ reimbursementRouter.get('/author/userId/:userId',authFactory([admin,financeManag
 });
 
 // Submit Reimbursements
-reimbursementRouter.post('/',authFactory([admin,financeManager]),(req,res,next)=>{
-  const {author,
+reimbursementRouter.post('/',authFactory([admin,financeManager]),async (req,res,next)=>{
+  const {author_id,
     amount,
     dateSubmitted,
     dateResolved,
     description,
-    resolver,
+    resolver_id,
     status,
     type} = req.body;
   try{
-    if(author&&amount&&dateSubmitted&&dateResolved&&description&&resolver&&status&&type){
-      const result = saveOneReimbursement(new Reimbursements(0,author,amount,dateSubmitted,dateResolved,description,resolver,status,type));
-      res.send(201).json(result);
+    if(author_id&&amount&&dateSubmitted&&dateResolved&&description&&status){
+      const result = await saveOneReimbursement(new ReimbursementDTO(0,author_id,amount,dateSubmitted,dateResolved,description,resolver_id,status,type));
+      console.log(result)
+      res.status(201).json(result);
     }
     else{
-      throw ReimbursementFieldsMissing;
+      throw new ReimbursementFieldsMissing;
     }
   }
   catch(e){
@@ -67,18 +69,15 @@ reimbursementRouter.post('/',authFactory([admin,financeManager]),(req,res,next)=
 });
 
 // Update Reimbursements
-reimbursementRouter.patch('/',authFactory([admin, financeManager]),(req,res,next)=>{
-  const {
-    reimbursementId,author,amount,dateSubmitted,dateResolved,description,status,resolver,type
-  } = req.body;
+reimbursementRouter.patch('/',authFactory([admin, financeManager]), async (req,res,next)=>{
+  const fields = {};
+  Object.keys(req.body).filter(el=>el!=='id'&&el!=='token'&&el!=='user').map(el=>fields[el]=req.body[el]);
+  if(Object.keys(fields).length===0||!req.body.id){
+    throw new ReimbursementFieldsMissing;
+  }
   try{
-    if(reimbursementId||author||amount||dateSubmitted||dateResolved||description||status||resolver||type){
-      const result = updateOneReimbursement({reimbursementId,author,amount,dateSubmitted,dateResolved,description,status,resolver,type});
-      res.send(201).json(result);
-    }
-    else{
-      throw ReimbursementFieldsMissing;
-    }
+    let result = await daoUpdateOneReimbursement(req.body.id,fields)
+    res.status(200).json(result);
   }
   catch(e){
     next(e);

@@ -4,7 +4,7 @@ export const financeManager = 'finance-manage';
 
 export default class Role {
   roleId: number;
-  role: string; // TODO: make unique in services
+  role: string; 
   constructor(roleId:number,role:string){
     this.roleId=roleId;
     this.role=role;

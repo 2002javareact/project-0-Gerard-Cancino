@@ -3,14 +3,14 @@ import Reimbursement from "../models/Reimbursement";
 
 export function reimbursementDTOToReimbursementConverter(reimbursementDTO:ReimbursementDTO){
   return new Reimbursement(
-    reimbursementDTO.reimbursementId,
-    reimbursementDTO.author,
+    reimbursementDTO.id,
+    reimbursementDTO.author_id,
     reimbursementDTO.amount,
-    reimbursementDTO.dateSubmitted,
-    reimbursementDTO.dateResolved,
+    reimbursementDTO.date_submitted,
+    reimbursementDTO.date_resolved,
     reimbursementDTO.description,
-    reimbursementDTO.status,
-    reimbursementDTO.resolver,
+    reimbursementDTO.status_id,
+    reimbursementDTO.resolver_id,
     reimbursementDTO.type
   )
 }

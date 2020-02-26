@@ -1,11 +1,13 @@
 import {UserDidNotLoginError} from '../errors/UserDidNotLoginError';
 import {UserIsNotAuthorized} from '../errors/UserIsNotAuthorized';
 import { admin } from '../models/Role';
-import { decode } from '../router/security-router'
+import * as jwt from 'json-web-token';
 
-export const authFactory = (roles:string[])=>{
-  return(req,res,next)=>{
-    if(!req.session.token){
+
+// TODO: It says please login
+export const authFactory = (roles:string[]) =>{
+  return (req,res,next)=>{
+    if(!req.body.token){
       throw new UserDidNotLoginError;
     }
     else if(roles.includes('Everyone')){
@@ -13,31 +15,27 @@ export const authFactory = (roles:string[])=>{
     }
     else{
       let allowed = false;
-      const user = decode(req.session.token);
-      console.log(user)
       for(let role of roles){
-        if(user.role===role){
+        if(role===req.body.user.role)
           allowed=true;
-          next();
-        }
       }
       if(!allowed){
         throw new UserIsNotAuthorized;
       }
+      next();
     }
-    next();
+   
   }
 }
 
 export const authCheckId = (req,res,next) => {
-  // if(req.session.user.role === admin){
-  //   next();
-  // }
-  // else if(req.session.user.id === +req.params.id){
-  //   next();
-  // }
-  // else{
-  //   throw new UserIsNotAuthorized;
-  // }
-  next();
+  if(req.session.user.role === admin){
+    next();
+  }
+  else if(req.session.user.id === +req.params.id){
+    next();
+  }
+  else{
+    throw new UserIsNotAuthorized;
+  }
 }
