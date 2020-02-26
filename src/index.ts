@@ -50,12 +50,14 @@ app.post('/login', async (req,res)=>{
 app.use('/',(req,res,next)=>{
   jwt.decode(key,req.body.token,(err,decodedPayload)=>{
     if(err){
+      err.message="They password or username is incorrect"
       throw err;
     }
     else{
       req.body.user=decodedPayload;
+      console.log(req.body.user)
+      next();
     }
-    next();
   })
 })
 
@@ -71,10 +73,10 @@ app.use('/reimbursements',reimbursementRouter)
 app.use('/',(e,req,res,next)=>{
   console.error(e.stack);
   if(e.status<500){
-      res.status(e.status).send(e.message);
+      res.status(400||e.status).send(e.message);
   }
   else{
-      res.status(e.status).send('Internal Server Error')
+      res.status(500||e.status).send('Internal Server Error')
   }
 })
 

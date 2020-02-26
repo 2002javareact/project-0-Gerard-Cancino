@@ -29,10 +29,10 @@ export const authFactory = (roles:string[]) =>{
 }
 
 export const authCheckId = (req,res,next) => {
-  if(req.session.user.role === admin){
+  if(req.body.user.role === admin){
     next();
   }
-  else if(req.session.user.id === +req.params.id){
+  else if(req.body.user.id === +req.params.id){
     next();
   }
   else{

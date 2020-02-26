@@ -5,6 +5,9 @@ import { UserNotFoundError } from "../errors/UserNotFoundError";
 import { userDTOToUserConverter } from "../utils/user-dto-to-user-converter";
 import { InternalServerError } from "../errors/InternalServerError";
 import { UserFailedToLogin} from '../errors/UserFailedToLoginError';
+import * as bcrypt from 'bcrypt';
+
+const saltRounds = 10;
 
 export async function daoFindUsers():Promise<User[]>{
   let client:PoolClient;
@@ -14,7 +17,7 @@ export async function daoFindUsers():Promise<User[]>{
     return result.rows.map(userDTOToUserConverter);
   }
   catch(e){
-    throw new InternalServerError;
+    throw e;
   }
   finally{
     client && client.release();
@@ -32,7 +35,7 @@ export async function daoFindUserById(userId:number):Promise<User>{
     return userDTOToUserConverter(result.rows[0]);
   }
   catch(e){
-    throw new InternalServerError;
+    throw e;
   }
   finally{
     client && client.release();
@@ -45,9 +48,23 @@ export async function daoUpdateUser(id,userFields){
     client = await connectionPool.connect();
     let fields = '';
     let i = 2;
-    Object.keys(userFields).filter(key=>key==='password'||key==='first_name'||key==='last_name'||key==='email').map(key=>fields+=`"${key}"=$${i++},`)
+    Object.keys(userFields).filter(key=>key==='first_name'||key==='last_name'||key==='email'||key==='password').map(key=>fields+=`"${key}"=$${i++},`)
     fields=fields.substr(0,fields.length-1);
     let values = [];
+    console.log(userFields)
+    if(Object.keys(userFields).includes('password')){
+      bcrypt.hash(userFields['password'],saltRounds,(e,hash)=>{
+        if(e){
+          throw e;
+        }
+        else{
+          console.log(hash)
+          console.log(id)
+          client.query('update public.user as U set "password"=$2 where U.id=$1;',[id,hash])
+        }
+      })
+    }
+    console.log('naw')
     Object.keys(userFields).map(key=>values.push(userFields[key]))
     let result = await client.query(`update public.user as U set ${fields} where U.id = $1 RETURNING *;`,[id,...values]);
     return userDTOToUserConverter(result.rows[0]);
@@ -64,13 +81,22 @@ export async function daoFindUserByUsernameAndPassword(username:string,password:
   let client:PoolClient;
   try{
     client = await connectionPool.connect();
-    let result = await client.query('SELECT * FROM public.user JOIN public.role on public.user.id=public.role.id WHERE public.user.username=$1 and public.user.password=$2',[username,password]); 
+    let result = await client.query('SELECT * FROM public.user as U join public.role as R on (U.role_id=R.id) WHERE U.username=$1',[username]);
     if(result.rows.length===0)
       throw new UserFailedToLogin;
+    bcrypt.compare(password,result.rows[0].password,(e,result)=>{
+      if(e){
+        throw e;
+      }
+      else{
+        if(!result)
+          throw new UserFailedToLogin;
+      }
+    })
     return userDTOToUserConverter(result.rows[0]);
   }
   catch(e){
-    throw new InternalServerError;
+    throw e;
   }
   finally{
     client && client.release();

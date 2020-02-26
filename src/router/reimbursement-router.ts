@@ -45,15 +45,16 @@ reimbursementRouter.get('/author/userId/:userId',authFactory([admin,financeManag
 reimbursementRouter.post('/',authFactory([admin,financeManager]),async (req,res,next)=>{
   const {author_id,
     amount,
-    dateSubmitted,
-    dateResolved,
+    date_submitted,
+    date_resolved,
     description,
     resolver_id,
-    status,
+    status_id,
     type} = req.body;
   try{
-    if(author_id&&amount&&dateSubmitted&&dateResolved&&description&&status){
-      const result = await saveOneReimbursement(new ReimbursementDTO(0,author_id,amount,dateSubmitted,dateResolved,description,resolver_id,status,type));
+    console.log(req.body)
+    if(author_id&&amount&&date_submitted&&date_resolved&&description&&status_id){
+      const result = await saveOneReimbursement(new ReimbursementDTO(0,author_id,amount,date_submitted,date_resolved,description,resolver_id,status_id,type));
       console.log(result)
       res.status(201).json(result);
     }
