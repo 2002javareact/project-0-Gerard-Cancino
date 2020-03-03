@@ -4,9 +4,8 @@ import { authFactory, authCheckId } from '../middleware/auth-middleware';
 import { financeManager, admin } from '../models/Role';
 import { BadCredentialsError } from '../errors/BadCredentialsError';
 import { ReimbursementFieldsMissing } from '../errors/ReimbursementFieldsMissing';
-import { findReimbursementsByUserId, saveOneReimbursement, updateOneReimbursement } from '../services/reimbursement-service';
+import { findReimbursementByStatusId, findReimbursementsByUserId, saveOneReimbursement, updateOneReimbursement } from '../services/reimbursement-service';
 import { isNamedExports } from 'typescript';
-import { daoFindReimbursementsByStatusId, daoUpdateOneReimbursement } from '../repositories/reimbursement-dao';
 import { ReimbursementDTO } from '../dtos/ReimbursementDTO';
 
 export const reimbursementRouter = express.Router();
@@ -18,7 +17,7 @@ reimbursementRouter.get('/status/:statusId',authFactory([admin,financeManager]),
     if(isNaN(statusId)){
       throw new BadCredentialsError;
     }
-    let result = await daoFindReimbursementsByStatusId(statusId);
+    let result = await findReimbursementByStatusId(statusId);
     res.status(200).json(result);
   }
   catch(e){
@@ -77,7 +76,7 @@ reimbursementRouter.patch('/',authFactory([admin, financeManager]), async (req,r
     throw new ReimbursementFieldsMissing;
   }
   try{
-    let result = await daoUpdateOneReimbursement(req.body.id,fields)
+    let result = await updateOneReimbursement(req.body.id,fields)
     res.status(200).json(result);
   }
   catch(e){
