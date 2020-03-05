@@ -80,8 +80,11 @@ export async function daoUpdateUser(id,userFields){
 export async function daoFindUserByUsernameAndPassword(username:string,password:string){
   let client:PoolClient;
   try{
+    console.log("connecting to DB")
     client = await connectionPool.connect();
+    console.log("Succesffuly Connected")
     let result = await client.query('SELECT * FROM public.user as U join public.role as R on (U.role_id=R.id) WHERE U.username=$1',[username]);
+    console.log(result);
     if(result.rows.length===0)
       throw new UserFailedToLogin;
     bcrypt.compare(password,result.rows[0].password,(e,result)=>{
