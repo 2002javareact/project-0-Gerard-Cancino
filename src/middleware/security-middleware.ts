@@ -24,6 +24,7 @@ const key = 'NotForProduction';
 securityMiddleware.post('/login', async (req,res)=>{
   // Get Data
   const {username,password} = req.body;
+  console.log('trying to login')
   // Validate date
   if(!username||!password) res.status(404).send('Please include username and password');
   else{

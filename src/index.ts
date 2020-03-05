@@ -7,15 +7,16 @@ import {securityMiddleware} from './middleware/security-middleware';
 
 const app = express();
 
-app.use('/',(req,res,next)=>[
-  console.log('connecting to link')
-])
+app.use('/',(req,res,next)=>{
+  console.log('connecting to link');
+  next();
+})
 
 //Middleware
 app.use(bodyparser.json());
 app.use(sessionMiddleware)
 
-
+//Security - Login - Decode
 app.use(securityMiddleware)
 
 //Routes

@@ -24,7 +24,6 @@ export const authFactory = (roles:string[]) =>{
       }
       next();
     }
-   
   }
 }
 
