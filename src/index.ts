@@ -4,6 +4,7 @@ import {userRouter} from './router/user-router';
 import {reimbursementRouter} from './router/reimbursement-router';
 import {sessionMiddleware} from './middleware/session-middleware';
 import {securityMiddleware} from './middleware/security-middleware';
+import { corsFilter } from './middleware/cors-filter-middleware';
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.use('/',(req,res,next)=>{
   console.log('connecting to link');
   next();
 })
+
+app.use(corsFilter);
 
 //Middleware
 app.use(bodyparser.json());
