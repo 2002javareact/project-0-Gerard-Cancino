@@ -56,14 +56,28 @@ securityMiddleware.post('/login', async (req,res)=>{
 
 securityMiddleware.use('/',(req,res,next)=>{
   jwt.decode(key,req.body.token,(err,decodedPayload)=>{
-      if(err){
-      err.message="They password or username is incorrect"
-      throw err;
-      }
-      else{
+    if(err){
+      err.message="Your Token has expired"
+    throw err;
+    }
+    else{
       req.body.user=decodedPayload;
       console.log(req.body.user)
       next();
-      }
+    }
   })
+})
+
+securityMiddleware.get('/token',(req,res,next)=>{  
+  jwt.decode(key,req.body.token,(err,decodedPayload)=>{
+    if(err){
+      err.message="Your Token has expired"
+    throw err;
+    }
+    else{
+      req.body.user=decodedPayload;
+      console.log(req.body.user)
+      next();
+    }
   })
+}) 

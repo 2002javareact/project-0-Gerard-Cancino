@@ -56,4 +56,3 @@ userRouter.patch('/',authFactory([admin]), async (req,res,next)=>{
     next(e);
   }
 })
-
