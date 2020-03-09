@@ -74,6 +74,7 @@ securityMiddleware.post('/token',(req,res,next)=>{
     throw err;
     }
     else{
+      console.log(decodedPayload)
       res.json(decodedPayload);
       next();
     }
