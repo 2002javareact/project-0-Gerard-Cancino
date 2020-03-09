@@ -62,7 +62,6 @@ securityMiddleware.use('/',(req,res,next)=>{
     }
     else{
       req.body.user=decodedPayload;
-      console.log(req.body.user)
       next();
     }
   })
@@ -75,8 +74,7 @@ securityMiddleware.get('/token',(req,res,next)=>{
     throw err;
     }
     else{
-      req.body.user=decodedPayload;
-      console.log(req.body.user)
+      res.send(decodedPayload);
       next();
     }
   })
