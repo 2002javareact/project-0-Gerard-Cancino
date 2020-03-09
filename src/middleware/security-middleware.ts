@@ -67,7 +67,7 @@ securityMiddleware.use('/',(req,res,next)=>{
   })
 })
 
-securityMiddleware.get('/token',(req,res,next)=>{  
+securityMiddleware.post('/token',(req,res,next)=>{  
   jwt.decode(key,req.body.token,(err,decodedPayload)=>{
     if(err){
       err.message="Your Token has expired"
