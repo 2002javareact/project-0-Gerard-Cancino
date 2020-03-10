@@ -16,4 +16,3 @@ export async function updateUser(id,updateFields):Promise<User>{
 export async function findUserByUsernameAndPassword(username:string,password:string):Promise<User>{
   return await daoFindUserByUsernameAndPassword(username,password);
 }
-

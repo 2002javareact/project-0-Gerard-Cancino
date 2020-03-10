@@ -1,6 +1,8 @@
+import { User } from './../../../project-1-Gerard-Cancino/src/models/User';
+import { BadCredentialsError } from './../../../project-1-Gerard-Cancino/src/errors/BadCredentialsError';
 import * as express from 'express';
-import * as jwt from 'json-web-token';
-import { findUserByUsernameAndPassword } from '../services/user-service';
+import * as jwt from 'jsonwebtoken';
+import { findUserByUsernameAndPassword, findUserById} from '../services/user-service';
 
 export const securityMiddleware = express();
 const key = 'NotForProduction';
@@ -19,29 +21,28 @@ const key = 'NotForProduction';
 */
 // Documentation for JWT https://www.npmjs.com/package/json-web-token
 
-
 // TODO Authorization
 securityMiddleware.post('/login', async (req,res)=>{
   // Get Data
   const {username,password} = req.body;
-  console.log('trying to login')
   // Validate date
   if(!username||!password) res.status(404).send('Please include username and password');
   else{
     try{
-      const currentUser = await findUserByUsernameAndPassword(username,password);
+      const profile = await findUserByUsernameAndPassword(username,password);
       const payload={
-        userId:currentUser.userId,
-        username:currentUser.username,
-        role:currentUser.role.role
+        userId:profile.userId,
+        username:profile.username,
+        role:profile.role.role
       }
-      jwt.encode(key,payload,'HS256',(err,token)=>{
+      // Previous: jwt.encode(key,payload,'HS256',(err,token)=>{
+      jwt.sign(payload,key,{algorithm: 'HS256', expiresIn: "1h"},(err,token)=>{
         if(err){
           throw err;
         }
         else{
           req.session.token = token;
-          res.status(200).json(token);
+          res.status(200).json({token,profile});
         }
       })
     }
@@ -55,7 +56,7 @@ securityMiddleware.post('/login', async (req,res)=>{
 
 
 securityMiddleware.use('/',(req,res,next)=>{
-  jwt.decode(key,req.body.token,(err,decodedPayload)=>{
+  jwt.verify(req.headers.authorization,key,(err,decodedPayload)=>{
     if(err){
       err.message="Your Token has expired"
     throw err;
@@ -67,16 +68,7 @@ securityMiddleware.use('/',(req,res,next)=>{
   })
 })
 
-securityMiddleware.post('/token',(req,res,next)=>{  
-  jwt.decode(key,req.body.token,(err,decodedPayload)=>{
-    if(err){
-      err.message="Your Token has expired"
-    throw err;
-    }
-    else{
-      console.log(decodedPayload)
-      res.json(decodedPayload);
-      next();
-    }
-  })
+securityMiddleware.post('/token', async (req,res,next)=> {  
+  let decoded =  jwt.decode(req.body.token)
+  res.json(decoded);
 }) 

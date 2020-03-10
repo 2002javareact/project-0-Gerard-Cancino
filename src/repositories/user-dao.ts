@@ -51,20 +51,16 @@ export async function daoUpdateUser(id,userFields){
     Object.keys(userFields).filter(key=>key==='first_name'||key==='last_name'||key==='email'||key==='password').map(key=>fields+=`"${key}"=$${i++},`)
     fields=fields.substr(0,fields.length-1);
     let values = [];
-    console.log(userFields)
     if(Object.keys(userFields).includes('password')){
       bcrypt.hash(userFields['password'],saltRounds,(e,hash)=>{
         if(e){
           throw e;
         }
         else{
-          console.log(hash)
-          console.log(id)
           client.query('update public.user as U set "password"=$2 where U.id=$1;',[id,hash])
         }
       })
     }
-    console.log('naw')
     Object.keys(userFields).map(key=>values.push(userFields[key]))
     let result = await client.query(`update public.user as U set ${fields} where U.id = $1 RETURNING *;`,[id,...values]);
     return userDTOToUserConverter(result.rows[0]);
@@ -80,11 +76,8 @@ export async function daoUpdateUser(id,userFields){
 export async function daoFindUserByUsernameAndPassword(username:string,password:string){
   let client:PoolClient;
   try{
-    console.log("connecting to DB")
     client = await connectionPool.connect();
-    console.log("Succesffuly Connected")
     let result = await client.query('SELECT * FROM public.user as U join public.role as R on (U.role_id=R.id) WHERE U.username=$1',[username]);
-    console.log(result);
     if(result.rows.length===0)
       throw new UserFailedToLogin;
     bcrypt.compare(password,result.rows[0].password,(e,result)=>{

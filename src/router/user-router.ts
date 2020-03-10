@@ -1,14 +1,11 @@
 import * as express from 'express';
 //import {User} from '../models/User';
-import * as jwt from 'json-web-token';
 import { BadCredentialsError } from '../errors/BadCredentialsError';
 import { findUserById, findUsers, updateUser } from '../services/user-service';
 import { authCheckId, authFactory } from '../middleware/auth-middleware';
-import { isNamedExports } from 'typescript';
 import { financeManager, admin } from '../models/Role';
 import { User } from '../models/User';
 import { UserFieldsMissing } from '../errors/UserFieldIsMissing';
-import { daoUpdateUser } from '../repositories/user-dao';
 
 export const userRouter = express.Router() ;
 
@@ -43,13 +40,12 @@ userRouter.get('/:id',authFactory([admin,financeManager]), authCheckId, async (r
 // Update User
 userRouter.patch('/',authFactory([admin]), async (req,res,next)=>{
   const fields = {};
-  console.log('patching')
   Object.keys(req.body).filter(el=>el!=='id'&&el!=='token'&&el!=='user').map(el=>fields[el]=req.body[el]);
   if(Object.keys(fields).length===0||!req.body.id){
     throw new UserFieldsMissing;
   }
   try{
-    let result = await daoUpdateUser(req.body.id,fields)
+    let result = await updateUser(req.body.id,fields)
     res.status(200).json(result);
   }
   catch(e){

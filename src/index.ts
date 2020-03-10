@@ -8,14 +8,6 @@ import { corsFilter } from './middleware/cors-filter-middleware';
 
 const app = express();
 
-app.use('/',(req,res,next)=>{
-  console.log(process.env.REVATURE_HOST)
-  console.log(process.env.REVATURE_PASSWORD)
-  console.log(process.env.REVATURE_USER)
-  console.log('connecting to link');
-  next();
-})
-
 app.use(corsFilter);
 
 //Middleware

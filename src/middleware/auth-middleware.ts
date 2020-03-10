@@ -1,16 +1,12 @@
 import {UserDidNotLoginError} from '../errors/UserDidNotLoginError';
 import {UserIsNotAuthorized} from '../errors/UserIsNotAuthorized';
 import { admin } from '../models/Role';
-import * as jwt from 'json-web-token';
 
 
 // TODO: It says please login
 export const authFactory = (roles:string[]) =>{
   return (req,res,next)=>{
-    if(!req.body.token){
-      throw new UserDidNotLoginError;
-    }
-    else if(roles.includes('Everyone')){
+    if(roles.includes('Everyone')){
       next();
     }
     else{
