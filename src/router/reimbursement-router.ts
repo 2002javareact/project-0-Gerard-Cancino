@@ -33,6 +33,7 @@ reimbursementRouter.get('/author/userId/:userId',authFactory([admin,financeManag
       throw new BadCredentialsError;
     }
     const reimbursements = await findReimbursementsByUserId(userId);
+    console.log(reimbursements)
     res.status(200).json(reimbursements);
   }
   catch(e){
