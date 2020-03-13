@@ -1,7 +1,7 @@
 import * as express from 'express';
 import Reimbursement from '../models/Reimbursement';
 import { authFactory, authCheckId } from '../middleware/auth-middleware';
-import { financeManager, admin } from '../models/Role';
+import { financeManager, admin, user } from '../models/Role';
 import { BadCredentialsError } from '../errors/BadCredentialsError';
 import { ReimbursementFieldsMissing } from '../errors/ReimbursementFieldsMissing';
 import { findReimbursementByStatusId, findReimbursementsByUserId, saveOneReimbursement, updateOneReimbursement } from '../services/reimbursement-service';
@@ -41,14 +41,18 @@ reimbursementRouter.get('/author/userId/:id',authCheckId([admin,financeManager])
 });
 
 // Submit Reimbursements
-reimbursementRouter.post('/',authFactory([admin,financeManager]),async (req,res,next)=>{
+reimbursementRouter.post('/',authFactory([user]),async (req,res,next)=>{
+  const date_submitted:number = Date.now();
+  const date_resolved:number = 19000101;
+  const resolver_id:number=undefined;
+  const status_id:number=1;
   const {author_id,
     amount,
-    date_submitted,
-    date_resolved,
+    //date_submitted,
+    //date_resolved,
     description,
-    resolver_id,
-    status_id,
+    //resolver_id,
+    //status_id,
     type} = req.body;
   try{
     if(author_id&&amount&&date_submitted&&date_resolved&&description&&status_id){
