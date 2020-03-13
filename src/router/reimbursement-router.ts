@@ -1,5 +1,5 @@
 import * as express from 'express';
-import Reimbursements from '../models/Reimbursement';
+import Reimbursement from '../models/Reimbursement';
 import { authFactory, authCheckId } from '../middleware/auth-middleware';
 import { financeManager, admin } from '../models/Role';
 import { BadCredentialsError } from '../errors/BadCredentialsError';
@@ -17,7 +17,7 @@ reimbursementRouter.get('/status/:statusId',authFactory([admin,financeManager]),
     if(isNaN(statusId)){
       throw new BadCredentialsError;
     }
-    let result = await findReimbursementByStatusId(statusId);
+    let result:Reimbursement[] = await findReimbursementByStatusId(statusId);
     res.status(200).json(result);
   }
   catch(e){
@@ -26,15 +26,14 @@ reimbursementRouter.get('/status/:statusId',authFactory([admin,financeManager]),
 });
 
 // Find Reimbursements by User
-reimbursementRouter.get('/author/userId/:userId',authFactory([admin,financeManager]), authCheckId, async (req,res,next)=>{
-  const userId = +req.params.userId;
+reimbursementRouter.get('/author/userId/:id',authCheckId([admin,financeManager]), async (req,res,next)=>{
+  const userId = +req.params.id;
   try{
     if(isNaN(userId)){
       throw new BadCredentialsError;
     }
-    const reimbursements = await findReimbursementsByUserId(userId);
-    console.log(reimbursements)
-    res.status(200).json(reimbursements);
+    const reimbursements:Reimbursement[] = await findReimbursementsByUserId(userId);
+    res.status(200).json(reimbursements)
   }
   catch(e){
     next(e);
@@ -52,10 +51,8 @@ reimbursementRouter.post('/',authFactory([admin,financeManager]),async (req,res,
     status_id,
     type} = req.body;
   try{
-    console.log(req.body)
     if(author_id&&amount&&date_submitted&&date_resolved&&description&&status_id){
-      const result = await saveOneReimbursement(new ReimbursementDTO(0,author_id,amount,date_submitted,date_resolved,description,resolver_id,status_id,type));
-      console.log(result)
+      const result:Reimbursement = await saveOneReimbursement(new ReimbursementDTO(0,author_id,amount,date_submitted,date_resolved,description,resolver_id,status_id,type));
       res.status(201).json(result);
     }
     else{
@@ -77,7 +74,7 @@ reimbursementRouter.patch('/',authFactory([admin, financeManager]), async (req,r
     throw new ReimbursementFieldsMissing;
   }
   try{
-    let result = await updateOneReimbursement(req.body.id,fields)
+    let result:Reimbursement = await updateOneReimbursement(req.body.id,fields)
     res.status(200).json(result);
   }
   catch(e){

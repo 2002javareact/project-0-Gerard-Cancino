@@ -24,8 +24,9 @@ export async function daoFindReimbursementsByUserId(userId):Promise<Reimbursemen
   let client:PoolClient;
   try{
     client=await connectionPool.connect();
-    let result = await client.query('SELECT * FROM public.reimbursement WHERE author_id=$1',[userId]); //TODO
+    let result = await client.query('SELECT * FROM public.reimbursement WHERE author_id=$1',[userId]); 
     return result.rows.map(reimbursementDTOToReimbursementConverter);
+    return []
   }
   catch(e){
     throw e;
@@ -38,8 +39,6 @@ export async function daoFindReimbursementsByUserId(userId):Promise<Reimbursemen
 export async function daoSaveOneReimbursement(reimbursement:ReimbursementDTO):Promise<Reimbursement>{
   let client:PoolClient;
   try{
-    console.log('not saving')
-    console.log(reimbursement)
     client = await connectionPool.connect();
     let result = await client.query('INSERT INTO public.reimbursement (author_id,amount,date_submitted ,date_resolved ,description ,resolver_id,status_id ,"type") VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id;', 
     [
@@ -54,7 +53,6 @@ export async function daoSaveOneReimbursement(reimbursement:ReimbursementDTO):Pr
       ]
     );
     reimbursement.id=result.rows[0].id;
-    console.log(reimbursement)
     return reimbursementDTOToReimbursementConverter(reimbursement);
   }
   catch(e){
@@ -75,7 +73,6 @@ export async function daoUpdateOneReimbursement(id,reimbursementFields):Promise<
     fields=fields.substr(0,fields.length-1);
     let values = [];
     Object.keys(reimbursementFields).map(key=>values.push(reimbursementFields[key]))
-    console.log(fields)
     let result = await client.query(`update public.reimbursement as R set ${fields} where R.id = $1 RETURNING *;`,[id,...values]); // TODO Patch
     return reimbursementDTOToReimbursementConverter(result.rows[0]);
   }

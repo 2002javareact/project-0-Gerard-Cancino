@@ -13,7 +13,7 @@ export const userRouter = express.Router() ;
 userRouter.get('/',authFactory([admin,financeManager]), async (req,res,next)=>{ 
   try{
     const users:User[] = await findUsers();
-    res.json(users);
+    res.status(200).json(users);
   }
   catch(e){
     next(e);
@@ -21,17 +21,19 @@ userRouter.get('/',authFactory([admin,financeManager]), async (req,res,next)=>{
 });
 
 // Find Users by ID
-userRouter.get('/:id',authFactory([admin,financeManager]), authCheckId, async (req,res,next)=>{
+userRouter.get('/:id', authCheckId([admin,financeManager]), async (req,res,next)=>{
   const id = +req.params.id;
-  try{
-    if(isNaN(id)){
-      throw new BadCredentialsError;
-    }
-    const user = await findUserById(id);
-    res.json(user);
+  if(isNaN(id)){
+    throw new BadCredentialsError;
   }
-  catch(e){
-    next(e);
+  else{
+    try{
+      const user:User = await findUserById(id);
+      res.status(200).json(user);
+    }
+    catch(e){
+      next(e);
+    }
   }
 })
 
@@ -45,7 +47,7 @@ userRouter.patch('/',authFactory([admin]), async (req,res,next)=>{
     throw new UserFieldsMissing;
   }
   try{
-    let result = await updateUser(req.body.id,fields)
+    let result:User = await updateUser(req.body.id,fields)
     res.status(200).json(result);
   }
   catch(e){

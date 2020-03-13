@@ -18,20 +18,17 @@ app.use(sessionMiddleware)
 app.use(securityMiddleware)
 
 //Routes
-app.use('/users',userRouter)
 app.use('/reimbursements',reimbursementRouter)
-
-
-
+app.use('/users',userRouter)
 
 // Error Handler Catch All Router
 app.use('/',(e,req,res,next)=>{
   console.error(e.stack);
   if(e.status<500){
-      res.status(400||e.status).send(e.message);
+      res.status(e.status).send(e.message);
   }
   else{
-      res.status(500||e.status).send('Internal Server Error')
+      res.status(404).send(e.message)
   }
 })
 

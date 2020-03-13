@@ -1,3 +1,4 @@
+import { TokenExpiredError } from './../errors/TokenExpiredError';
 import { User } from './../../../project-1-Gerard-Cancino/src/models/User';
 import { BadCredentialsError } from './../../../project-1-Gerard-Cancino/src/errors/BadCredentialsError';
 import * as express from 'express';
@@ -58,8 +59,7 @@ securityMiddleware.post('/login', async (req,res)=>{
 securityMiddleware.use('/',(req,res,next)=>{
   jwt.verify(req.headers.authorization,key,(err,decodedPayload)=>{
     if(err){
-      err.message="Your Token has expired"
-    throw err;
+      throw new TokenExpiredError();
     }
     else{
       req.body.user=decodedPayload;
@@ -67,8 +67,3 @@ securityMiddleware.use('/',(req,res,next)=>{
     }
   })
 })
-
-securityMiddleware.post('/token', async (req,res,next)=> {  
-  let decoded =  jwt.decode(req.body.token)
-  res.json(decoded);
-}) 
