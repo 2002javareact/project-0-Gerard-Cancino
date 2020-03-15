@@ -39,6 +39,7 @@ export async function daoFindReimbursementsByUserId(userId):Promise<Reimbursemen
 export async function daoSaveOneReimbursement(reimbursement:ReimbursementDTO):Promise<Reimbursement>{
   let client:PoolClient;
   try{
+    console.log(reimbursement)
     client = await connectionPool.connect();
     let result = await client.query('INSERT INTO public.reimbursement (author_id,amount,date_submitted ,date_resolved ,description ,resolver_id,status_id ,"type") VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id;', 
     [
@@ -47,8 +48,8 @@ export async function daoSaveOneReimbursement(reimbursement:ReimbursementDTO):Pr
         reimbursement.date_submitted,
         reimbursement.date_resolved,
         reimbursement.description,
-        reimbursement.status_id,
         reimbursement.resolver_id, 
+        reimbursement.status_id,
         reimbursement.type
       ]
     );

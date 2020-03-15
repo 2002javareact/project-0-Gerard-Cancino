@@ -42,21 +42,16 @@ reimbursementRouter.get('/author/userId/:id',authCheckId([admin,financeManager])
 
 // Submit Reimbursements
 reimbursementRouter.post('/',authFactory([user]),async (req,res,next)=>{
-  const date_submitted:number = Date.now();
-  const date_resolved:number = 19000101;
+  const date_submitted:number = new Date().valueOf();
+  const date_resolved:number = 2696400000;
   const resolver_id:number=undefined;
   const status_id:number=1;
   const {author_id,
     amount,
-    //date_submitted,
-    //date_resolved,
     description,
-    //resolver_id,
-    //status_id,
     type} = req.body;
-  try{
-    if(author_id&&amount&&date_submitted&&date_resolved&&description&&status_id){
-      const result:Reimbursement = await saveOneReimbursement(new ReimbursementDTO(0,author_id,amount,date_submitted,date_resolved,description,resolver_id,status_id,type));
+  try{if(author_id&&amount&&date_submitted&&date_resolved&&description&&status_id){
+      const result:Reimbursement = await saveOneReimbursement(new ReimbursementDTO(0,author_id,amount,date_submitted,date_resolved,description,status_id,resolver_id,type))
       res.status(201).json(result);
     }
     else{
