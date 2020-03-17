@@ -1,4 +1,4 @@
-insert into "role" ("name") values ('admin'),('finance-manage'),('user');
+insert into "role" ("name") values ('admin'),('finance-manager'),('user');
 
 insert into reimbursement_status (status) values ('Pending'),('Approved'),('Denied');
 
@@ -15,4 +15,6 @@ insert into reimbursement (author_id,amount,date_submitted ,date_resolved ,descr
 													(3,20,1596254400000,2696400000,'customer tried to buy other',null,3,1),
 													(4,19.99,1607922000000,2696400000,'customer tried to buy lodging',null,3,1);
 
-SELECT * FROM public.user JOIN public.role on public.user.role_id=public.role.id WHERE public.user.username="username"
+SELECT * FROM public.user JOIN public.role on public.user.role_id=public.role.id WHERE public.user.username="username";
+
+SELECT R.id,author_id,amount,date_submitted,date_resolved,description,U.first_name,U.last_name ,RS.status,RT."type" FROM public.reimbursement AS R JOIN public.reimbursement_status AS RS ON RS.id=R.status_id JOIN public.reimbursement_type AS RT ON RT.id=R.type join public."user" as U on U.id=R.resolver_id WHERE author_id=3

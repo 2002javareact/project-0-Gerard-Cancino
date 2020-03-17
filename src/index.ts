@@ -23,12 +23,13 @@ app.use('/users',userRouter)
 
 // Error Handler Catch All Router
 app.use('/',(e,req,res,next)=>{
-  console.error(e.stack);
+  console.log(e);
   if(e.status<500){
-      res.status(e.status).send(e.message);
+    console.log('sending out:' + e.status)
+    res.status(e.status).json({status:e.status,message:e.message});
   }
   else{
-      res.status(404).send(e.message)
+    res.sendStatus(500);
   }
 })
 

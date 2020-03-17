@@ -80,16 +80,13 @@ export async function daoFindUserByUsernameAndPassword(username:string,password:
     let result = await client.query('SELECT * FROM public.user as U join public.role as R on (U.role_id=R.id) WHERE U.username=$1',[username]);
     if(result.rows.length===0)
       throw new UserFailedToLogin;
-    bcrypt.compare(password,result.rows[0].password,(e,result)=>{
-      if(e){
-        throw e;
-      }
-      else{
-        if(!result)
-          throw new UserFailedToLogin;
-      }
-    })
-    return userDTOToUserConverter(result.rows[0]);
+    let isMatch = await bcrypt.compare(password,result.rows[0].password);
+    if(isMatch){
+      return userDTOToUserConverter(result.rows[0]);
+    }
+    else{
+      throw new UserFailedToLogin();
+    }
   }
   catch(e){
     throw e;

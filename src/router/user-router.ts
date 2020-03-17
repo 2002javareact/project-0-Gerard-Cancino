@@ -42,7 +42,9 @@ userRouter.get('/:id', authCheckId([admin,financeManager]), async (req,res,next)
 // Update User
 userRouter.patch('/',authFactory([admin]), async (req,res,next)=>{
   const fields = {};
-  Object.keys(req.body).filter(el=>el!=='id'&&el!=='token'&&el!=='user').map(el=>fields[el]=req.body[el]);
+  console.log(req.body)
+  Object.keys(req.body).filter(el=>el!=='id'&&el!=='token'&&el!=='user'&&req.body[el]!=='').map(el=>fields[el]=req.body[el]);
+  console.log(fields)
   if(Object.keys(fields).length===0||!req.body.id){
     throw new UserFieldsMissing;
   }

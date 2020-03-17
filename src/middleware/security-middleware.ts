@@ -1,9 +1,8 @@
 import { TokenExpiredError } from './../errors/TokenExpiredError';
-import { User } from './../../../project-1-Gerard-Cancino/src/models/User';
-import { BadCredentialsError } from './../../../project-1-Gerard-Cancino/src/errors/BadCredentialsError';
 import * as express from 'express';
 import * as jwt from 'jsonwebtoken';
-import { findUserByUsernameAndPassword, findUserById} from '../services/user-service';
+import { findUserByUsernameAndPassword } from '../services/user-service';
+import { UserFailedToLogin } from '../errors/UserFailedToLoginError';
 
 export const securityMiddleware = express();
 const key = 'NotForProduction';
@@ -23,11 +22,11 @@ const key = 'NotForProduction';
 // Documentation for JWT https://www.npmjs.com/package/json-web-token
 
 // TODO Authorization
-securityMiddleware.post('/login', async (req,res)=>{
+securityMiddleware.post('/login', async (req,res,next)=>{
   // Get Data
   const {username,password} = req.body;
   // Validate date
-  if(!username||!password) res.status(404).send('Please include username and password');
+  if(!username||!password) next(new UserFailedToLogin());
   else{
     try{
       const profile = await findUserByUsernameAndPassword(username,password);
@@ -48,9 +47,8 @@ securityMiddleware.post('/login', async (req,res)=>{
       })
     }
     catch(e) {
-      throw e;
+      next(new UserFailedToLogin());
     }
-  
   }
 });
 
@@ -59,7 +57,7 @@ securityMiddleware.post('/login', async (req,res)=>{
 securityMiddleware.use('/',(req,res,next)=>{
   jwt.verify(req.headers.authorization,key,(err,decodedPayload)=>{
     if(err){
-      throw new TokenExpiredError();
+      next(new TokenExpiredError());
     }
     else{
       req.body.user=decodedPayload;
