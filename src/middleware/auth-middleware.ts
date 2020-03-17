@@ -1,10 +1,10 @@
-import { UserFailedToLogin } from './../errors/UserFailedToLoginError';
 import {UserIsNotAuthorized} from '../errors/UserIsNotAuthorized';
+import { UserDidNotLoginError } from '../errors/UserDidNotLoginError';
 
 export const authFactory = (roles:string[]) =>{
   return (req,res,next)=>{
     if(!req.body.user){
-      throw new UserFailedToLogin();
+      throw new UserDidNotLoginError();
     }
     else if(roles.includes('Everyone')){
       next();

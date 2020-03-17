@@ -4,7 +4,7 @@
 const mockRequest = ()=>{
     //
     return {
-        session:{
+        body:{
             user:{
                 role:''
             }
@@ -22,51 +22,57 @@ const mockResponse = () => {
 
 
 
-import {authAdminMiddleware} from '../../src/middleware/auth-midleware'
+import {authFactory} from './auth-middleware'
+import { UserIsNotAuthorized } from '../errors/UserIsNotAuthorized'
 // to build a suite of tests in jest 
 // we use the word describe
-describe('authAdminMiddleware', ()=>{
+describe('authFactory', ()=>{
     //this is where all the tests go
     let req;
     let res;
-    let next
+    let next;
+    let string;
 
     beforeEach(()=>{
         req = mockRequest()
         res = mockResponse()
         next = jest.fn()
+        string = []
     })
     // this will run a single test
     it('should allow an admin through', () =>{
         //set up test
-        req.session.user.role = 'Admin'
+        req.body.user.role = 'admin';
+        string = ['admin','finance-manager','user'];
         //call the function
-        authAdminMiddleware(req,res,next)
+        authFactory(string)(req,res,next);
         // now we write some assertations
-        expect(next).toBeCalled()
-        expect(res.send).not.toBeCalled()
+        expect(next).toBeCalled();
     })
 
     it('should not allow a non admin through', () =>{
         //set up test
-        req.session.user.role = 'User'
+        req.body.user.role = 'finance-manager';
+        // string = ['admin']
         //call the function
-        authAdminMiddleware(req,res,next)
+        let auth = authFactory(string)
         // now we write some assertations
-        expect(next).not.toBeCalled()
-        expect(res.send).toBeCalled()
-        expect(res.status).toBeCalledWith(403)
+        //expect(next).not.toBeCalled();
+        expect(auth).toThrow();
     })
 
     it('should not allow an un-logged in user', () =>{
         //set up test
-        req.session.user = undefined
+        req.body.user = undefined
+        string = ['admin','finance-manager','user']
         //call the function
-        authAdminMiddleware(req,res,next)
+        let auth = authFactory(string);
         // now we write some assertations
-        expect(next).not.toBeCalled()
-        expect(res.send).toBeCalled()
-        expect(res.status).toBeCalledWith(401)
+        expect(auth).toThrow();
     })
 
 })
+
+function authFactoryFinanceManager(){
+    authFactory(['admin'])
+}
